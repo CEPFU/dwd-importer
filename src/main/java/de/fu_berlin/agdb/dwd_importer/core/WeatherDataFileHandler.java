@@ -9,6 +9,7 @@ import java.util.StringTokenizer;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import de.fu_berlin.agdb.importer.payload.DataType;
 import de.fu_berlin.agdb.importer.payload.LocationWeatherData;
 
 public class WeatherDataFileHandler extends DataFileHandler{
@@ -94,7 +95,7 @@ public class WeatherDataFileHandler extends DataFileHandler{
 		//SCHNEEHOEHE
 		double snowHeight = Double.valueOf(tokenizer.nextToken());
 		
-		LocationWeatherData locationWeatherData = new LocationWeatherData(dwDataHandler.getMetaDataForStation(stationId), System.currentTimeMillis());
+		LocationWeatherData locationWeatherData = new LocationWeatherData(dwDataHandler.getMetaDataForStation(stationId), System.currentTimeMillis(), DataType.REPORT);
 		//TODO think about how to add the data below
 		dwDataHandler.addData(locationWeatherData);
 		
