@@ -21,7 +21,7 @@ public class DWDImporter extends AWeatherImporter {
 	
 	@Override
 	protected List<LocationWeatherData> getWeatherDataForLocations(List<StationMetaData> locations) {
-		DataGatherer dataGatherer = new DataGatherer(NUMBER_OF_THREADS);
+		DataGatherer dataGatherer = new DataGatherer(NUMBER_OF_THREADS, locations);
 		try {
 			return dataGatherer.gatherData();
 		} catch (SocketException e) {

@@ -27,9 +27,11 @@ public class DataGatherer implements IFTPFileWorkerProvider, IDWDDataHandler{
 	private List<FTPFile> ftpFiles;
 	
 	private ArrayList<LocationWeatherData> gatheredLocationWeatherData;
+	private List<StationMetaData> locations;
 
-	public DataGatherer(int numberOfThreads){
+	public DataGatherer(int numberOfThreads, List<StationMetaData> locations){
 		this.numberOfThreads = numberOfThreads;
+		this.locations = locations;
 		gatheredLocationWeatherData = new ArrayList<LocationWeatherData>();
 	}
 	
@@ -101,8 +103,12 @@ public class DataGatherer implements IFTPFileWorkerProvider, IDWDDataHandler{
 	}
 
 	@Override
-	public StationMetaData getMetaDataForStation(long id) {
-		// TODO Auto-generated method stub
+	public StationMetaData getMetaDataForStation(long id){
+		for (StationMetaData stationMetaData : locations) {
+			if(stationMetaData.getStationId() == id){
+				return stationMetaData;
+			}
+		}
 		return null;
 	}
 }

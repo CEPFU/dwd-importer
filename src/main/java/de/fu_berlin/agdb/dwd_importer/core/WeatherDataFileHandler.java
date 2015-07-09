@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 
 import de.fu_berlin.agdb.importer.payload.DataType;
 import de.fu_berlin.agdb.importer.payload.LocationWeatherData;
+import de.fu_berlin.agdb.importer.payload.StationMetaData;
 
 public class WeatherDataFileHandler extends DataFileHandler{
 
@@ -40,6 +41,7 @@ public class WeatherDataFileHandler extends DataFileHandler{
 		logger.debug("Deleted weather data File " + getFile().getName());
 	}
 	
+	@SuppressWarnings("unused")
 	private void injectDataLine(String line) {
 		line = line.replace(" ", "");
 		
@@ -60,7 +62,7 @@ public class WeatherDataFileHandler extends DataFileHandler{
 		double averageAirTemperature = Double.valueOf(tokenizer.nextToken());
 		
 		//DAMPFDRUCK (hpa)
-		double steampressure = Double.valueOf(tokenizer.nextToken());
+		double steamPressure = Double.valueOf(tokenizer.nextToken());
 
 		//BEDECKUNGSGRAD (eight) (1/8, 2/8, ..., 8/8)
 		double cloudage = Double.valueOf(tokenizer.nextToken());
@@ -95,43 +97,26 @@ public class WeatherDataFileHandler extends DataFileHandler{
 		//SCHNEEHOEHE
 		double snowHeight = Double.valueOf(tokenizer.nextToken());
 		
-		LocationWeatherData locationWeatherData = new LocationWeatherData(dwDataHandler.getMetaDataForStation(stationId), System.currentTimeMillis(), DataType.REPORT);
-		//TODO think about how to add the data below
-		dwDataHandler.addData(locationWeatherData);
-		
-//		String statement = "INSERT INTO dwd_station_weather_data "
-//				+ "(station_id, date, quality_level, average_air_temperature, steampressure, "
-//				+ "    cloudage, air_pressure, relative_humidity_of_the_air, wind_speed, maximum_air_temperature,"
-//				+ "    minimum_air_temperature, minimum_air_temperature_ground, maximum_wind_speed,"
-//				+ "    precipitationDepth, sunshine_duration, snow_height) "
-//				+ "  SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? "
-//				+ "  WHERE NOT EXISTS( "
-//				+ "    SELECT station_id, date "
-//				+ "    FROM dwd_station_weather_data "
-//				+ "    WHERE station_id = ?"
-//				+ "    AND date = ?); ";
-//		
-//		PreparedStatement preparedStatemend = getConnection().prepareStatement(statement);
-//		preparedStatemend.setLong(1, stationId);
-//		preparedStatemend.setDate(2, date);
-//		preparedStatemend.setInt(3, qualityLevel);
-//		preparedStatemend.setDouble(4, averageAirTemperature);
-//		preparedStatemend.setDouble(5, steampressure);
-//		preparedStatemend.setDouble(6, cloudage);
-//		preparedStatemend.setDouble(7, airPressure);
-//		preparedStatemend.setDouble(8, relativeHumidityOfTheAir);
-//		preparedStatemend.setDouble(9, windSpeed);
-//		preparedStatemend.setDouble(10, maximumAirTemperature);
-//		preparedStatemend.setDouble(11, minimumAirTemperature);
-//		preparedStatemend.setDouble(12, minimumAirTemperatureGround);
-//		preparedStatemend.setDouble(13, maximumWindSpeed);
-//		preparedStatemend.setDouble(14, precipitationDepth);
-//		preparedStatemend.setDouble(15, sunshineDuration);
-//		preparedStatemend.setDouble(16, snowHeight);
-//		
-//		preparedStatemend.setLong(17, stationId);
-//		preparedStatemend.setDate(18, date);
-//		preparedStatemend.execute();
-//		preparedStatemend.close();
+		StationMetaData metaDataForStation = dwDataHandler.getMetaDataForStation(stationId);;
+		if(dwDataHandler.getMetaDataForStation(stationId) != null){
+			LocationWeatherData locationWeatherData = new LocationWeatherData(dwDataHandler.getMetaDataForStation(stationId), System.currentTimeMillis(), DataType.REPORT);
+			
+			locationWeatherData.setQualityLevel(qualityLevel);
+			locationWeatherData.setTemperature(averageAirTemperature);
+			locationWeatherData.setSteamPressure(steamPressure);
+			locationWeatherData.setCloudage(cloudage);
+			locationWeatherData.setAtmospherePressure(airPressure);
+			locationWeatherData.setAtmosphereHumidity(relativeHumidityOfTheAir);
+			locationWeatherData.setWindSpeed(windSpeed);
+			locationWeatherData.setTemperatureHigh(maximumAirTemperature);
+			locationWeatherData.setTemperatureLow(minimumAirTemperature);
+			locationWeatherData.setMinimumAirGroundTemperature(minimumAirTemperatureGround);
+			locationWeatherData.setMaximumWindSpeed(maximumWindSpeed);
+			locationWeatherData.setPrecipitationDepth(precipitationDepth);
+			locationWeatherData.setSunshineDuration(sunshineDuration);
+			locationWeatherData.setSnowHeight(snowHeight);
+			
+			dwDataHandler.addData(locationWeatherData);
+		}
 	}
 }
