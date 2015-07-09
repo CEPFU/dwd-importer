@@ -1,14 +1,10 @@
 package de.fu_berlin.agdb.dwd_importer.core;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.net.ftp.FTP;
@@ -28,34 +24,40 @@ public class DataGatherer implements IFTPFileWorkerProvider, IDWDDataHandler{
 	
 	private ArrayList<LocationWeatherData> gatheredLocationWeatherData;
 	private List<StationMetaData> locations;
+	private HashMap<Thread, FTPClient> ftpClients;
 
 	public DataGatherer(int numberOfThreads, List<StationMetaData> locations){
 		this.numberOfThreads = numberOfThreads;
 		this.locations = locations;
 		gatheredLocationWeatherData = new ArrayList<LocationWeatherData>();
+		ftpClients = new HashMap<Thread, FTPClient>();
 	}
 	
 	public List<LocationWeatherData> gatherData() throws SocketException, IOException {
 		FTPClient ftpClient = setupFTPClient(dataDirectory);
+		
 		ftpFiles = new ArrayList<FTPFile>(Arrays.asList(ftpClient.listFiles()));
 		
 		List<Thread> threads = new ArrayList<Thread>();
 		for(int i = 0;  i < numberOfThreads; i++){
-			Thread thread = new Thread(new FTPFileWorker(this, ftpClient, this));
+			FTPClient threadFtpClient = setupFTPClient(dataDirectory);
+			Thread thread = new Thread(new FTPFileWorker(this, threadFtpClient, this));
+			ftpClients.put(thread, threadFtpClient);
 			threads.add(thread);
 			thread.start();
 		}
 		
 		waitForThreads(threads);
-		shutDownFTPClient(ftpClient);
 		
+		shutDownFTPClient(ftpClient);
 		return gatheredLocationWeatherData;
 	}
 	
-	private void waitForThreads(List<Thread> threads){
+	private void waitForThreads(List<Thread> threads) throws IOException{
 		for (Thread thread : threads) {
 			try {
 				thread.join();
+				shutDownFTPClient(ftpClients.get(thread));
 			} catch (InterruptedException e) {
 				waitForThreads(threads);
 			}
@@ -83,16 +85,7 @@ public class DataGatherer implements IFTPFileWorkerProvider, IDWDDataHandler{
 		return null;
 	}
 	
-	public synchronized boolean retriveFTPFile(FTPClient ftpClient, FTPFile ftpFile,
-			File file) throws FileNotFoundException, IOException {
-		OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
-		boolean success = ftpClient.retrieveFile(ftpFile.getName(), outputStream);
-		outputStream.close();
-		return success;
-	}
-
-	private void shutDownFTPClient(FTPClient ftpClient)
-			throws IOException {
+	private void shutDownFTPClient(FTPClient ftpClient) throws IOException {
 		ftpClient.logout();
 		ftpClient.disconnect();
 	}

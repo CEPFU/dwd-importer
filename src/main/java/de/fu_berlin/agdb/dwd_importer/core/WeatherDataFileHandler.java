@@ -97,7 +97,7 @@ public class WeatherDataFileHandler extends DataFileHandler{
 		//SCHNEEHOEHE
 		double snowHeight = Double.valueOf(tokenizer.nextToken());
 		
-		StationMetaData metaDataForStation = dwDataHandler.getMetaDataForStation(stationId);;
+		StationMetaData metaDataForStation = dwDataHandler.getMetaDataForStation(stationId);
 		if(dwDataHandler.getMetaDataForStation(stationId) != null){
 			LocationWeatherData locationWeatherData = new LocationWeatherData(dwDataHandler.getMetaDataForStation(stationId), System.currentTimeMillis(), DataType.REPORT);
 			
