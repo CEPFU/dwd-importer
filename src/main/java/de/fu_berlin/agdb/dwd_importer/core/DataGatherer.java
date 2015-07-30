@@ -11,6 +11,7 @@ import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 
+import de.fu_berlin.agdb.importer.payload.LocationMetaData;
 import de.fu_berlin.agdb.importer.payload.LocationWeatherData;
 import de.fu_berlin.agdb.importer.payload.StationMetaData;
 
@@ -23,10 +24,10 @@ public class DataGatherer implements IFTPFileWorkerProvider, IDWDDataHandler{
 	private List<FTPFile> ftpFiles;
 	
 	private ArrayList<LocationWeatherData> gatheredLocationWeatherData;
-	private List<StationMetaData> locations;
+	private List<LocationMetaData> locations;
 	private HashMap<Thread, FTPClient> ftpClients;
 
-	public DataGatherer(int numberOfThreads, List<StationMetaData> locations){
+	public DataGatherer(int numberOfThreads, List<LocationMetaData> locations){
 		this.numberOfThreads = numberOfThreads;
 		this.locations = locations;
 		gatheredLocationWeatherData = new ArrayList<LocationWeatherData>();
@@ -97,9 +98,12 @@ public class DataGatherer implements IFTPFileWorkerProvider, IDWDDataHandler{
 
 	@Override
 	public StationMetaData getMetaDataForStation(long id){
-		for (StationMetaData stationMetaData : locations) {
-			if(stationMetaData.getStationId() == id){
-				return stationMetaData;
+		for (LocationMetaData locationMetaData : locations) {
+			if(locationMetaData instanceof StationMetaData){
+				StationMetaData stationMetaData = (StationMetaData)locationMetaData;
+				if(stationMetaData.getStationId() == id){
+					return stationMetaData;
+				}
 			}
 		}
 		return null;

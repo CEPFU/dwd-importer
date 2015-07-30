@@ -10,8 +10,8 @@ import org.apache.log4j.Logger;
 import de.fu_berlin.agdb.dwd_importer.core.DataGatherer;
 import de.fu_berlin.agdb.dwd_importer.core.FTPFileWorker;
 import de.fu_berlin.agdb.importer.AWeatherImporter;
+import de.fu_berlin.agdb.importer.payload.LocationMetaData;
 import de.fu_berlin.agdb.importer.payload.LocationWeatherData;
-import de.fu_berlin.agdb.importer.payload.StationMetaData;
 
 public class DWDImporter extends AWeatherImporter {
 
@@ -20,7 +20,7 @@ public class DWDImporter extends AWeatherImporter {
 	private static final int NUMBER_OF_THREADS = 10;
 	
 	@Override
-	protected List<LocationWeatherData> getWeatherDataForLocations(List<StationMetaData> locations) {
+	protected List<LocationWeatherData> getWeatherDataForLocations(List<LocationMetaData> locations) {
 		DataGatherer dataGatherer = new DataGatherer(NUMBER_OF_THREADS, locations);
 		try {
 			return dataGatherer.gatherData();
