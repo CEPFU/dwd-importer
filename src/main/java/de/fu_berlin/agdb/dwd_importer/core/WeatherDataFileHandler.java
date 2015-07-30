@@ -1,8 +1,9 @@
 package de.fu_berlin.agdb.dwd_importer.core;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.Date;
 import java.util.StringTokenizer;
 
@@ -26,7 +27,7 @@ public class WeatherDataFileHandler extends DataFileHandler{
 	@Override
 	public void handleDataFile() throws IOException {
 		logger.debug("Analyzing weather data File " + getFile().getName());
-		BufferedReader reader = new BufferedReader(new FileReader(getFile()));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), "ISO-8859-1"));
 		//ignore first line because it has no relevant information
 		//maybe only the last line should be used due to the fact that all other lines
 		//have duplicated information
